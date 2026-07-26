@@ -7,7 +7,7 @@ mechanics are unit-tested rather than only felt.
 
 The design lives in [`specs/outlines/blockyhop-endless-hopper.md`](specs/outlines/blockyhop-endless-hopper.md).
 
-**v1 is complete and playable.** Hosting is deliberately not set up — see Still open.
+**v1 is complete and live at [blockyhop.dotschranz.net](https://blockyhop.dotschranz.net).**
 
 ## Layout
 
@@ -29,6 +29,21 @@ pnpm dev          # --host is already in the script; use the Network URL on a ph
 
 `pnpm test` runs the suite. `pnpm build` typechecks and emits a static `dist/` — the game
 is a static site with no backend, so anything that serves files will host it.
+
+## Deployment
+
+Push to `main` → CI runs typecheck, tests, and build → a multi-stage image builds the
+site and serves it from nginx → pushed to `ghcr.io/sossenbinder/blockyhop:latest`.
+ArgoCD in [HKube](https://github.com/Sossenbinder/HKube) syncs `charts/blockyhop` onto
+the k3s cluster within ~3 minutes, with Traefik terminating TLS from cert-manager.
+
+The image tag is `latest` and ArgoCD only redeploys on manifest changes, so a build with
+no chart change needs a nudge:
+
+```bash
+export KUBECONFIG=~/.kube/hkube-config
+kubectl rollout restart deployment/blockyhop -n apps
+```
 
 **Controls:** tap to hop forward, swipe to steer. On desktop, WASD or the arrow keys, and
 space to hop. Any tap restarts after a game over.
@@ -62,8 +77,14 @@ no atlas. Recolouring the unicorn is editing a hex value.
 
 ## What v1 established
 
-Four things were wrong in ways that only showed up by testing or by looking, and each is
+Five things were wrong in ways that only showed up by testing or by looking, and each is
 easy to reintroduce:
+
+- **`touch-action` is not inherited.** Setting it on `body` leaves the canvas — the only
+  element a player actually touches — free to pan and double-tap-zoom, eating the exact
+  gestures the game needs. It has to go on `*`. Related: a swipe that fires on release
+  rather than on crossing its threshold adds a tenth of a second of lag to every steer,
+  and tracking one pointer at a time drops the second thumb of a player who alternates.
 
 - **A buffered hop must not skip the landing.** Resolving the queued input on the same
   step the player lands, before the hazard check, granted one free frame of immunity —
@@ -94,8 +115,6 @@ dials most worth turning are in `src/sim/tuning.ts`:
 
 Not built, in rough order of how much each would add:
 
-- **Hosting.** The build is static; a GitHub Pages workflow is roughly one file. Until
-  then "easy to play" only holds on the LAN.
 - **Audio.** A hop blip and a splash would carry a lot for a few hundred bytes of
   WebAudio, no assets needed.
 - **Characters and coins.** The renderer already builds models by key, so a second
