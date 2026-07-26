@@ -1,0 +1,167 @@
+:root {
+  --ink: #2b2540;
+  --sky: #9fd9f2;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  /* Not inherited, so setting it on body alone leaves the canvas free to pan and
+     double-tap-zoom — which on a phone eats exactly the gestures the game needs. */
+  touch-action: none;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  /* Follows the visible area as mobile browser chrome collapses; 100% is the fallback. */
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--sky);
+  /* The whole page is a game surface: no scrolling, no pull-to-refresh, no zoom. */
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#hud {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none;
+  color: #fff;
+}
+
+#score {
+  font-size: clamp(38px, 11vw, 72px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow:
+    0 3px 0 rgba(43, 37, 64, 0.35),
+    0 0 18px rgba(43, 37, 64, 0.2);
+}
+
+#best {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+  text-shadow: 0 2px 0 rgba(43, 37, 64, 0.3);
+}
+
+#hint {
+  position: fixed;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  pointer-events: none;
+  text-shadow: 0 2px 0 rgba(43, 37, 64, 0.35);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(43, 37, 64, 0.45);
+  backdrop-filter: blur(3px);
+  padding: 24px;
+}
+
+#panel {
+  width: min(320px, 100%);
+  padding: 26px 24px 22px;
+  border-radius: 22px;
+  background: #fffdf9;
+  box-shadow: 0 18px 40px rgba(43, 37, 64, 0.35);
+  text-align: center;
+  color: var(--ink);
+}
+
+#panel h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+#overlay-cause {
+  margin: 6px 0 18px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+#numbers {
+  display: flex;
+  justify-content: center;
+  gap: 34px;
+  margin-bottom: 22px;
+}
+
+#numbers div {
+  display: flex;
+  flex-direction: column;
+}
+
+#numbers span {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+#numbers label {
+  margin-top: 5px;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+#restart {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ff8fc7, #f2609f);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #d1478a;
+}
+
+#restart:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #d1478a;
+}
+
+.hidden {
+  display: none !important;
+}
